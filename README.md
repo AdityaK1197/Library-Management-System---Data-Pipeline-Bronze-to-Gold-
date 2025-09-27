@@ -48,8 +48,7 @@ gold.dim_masterdata: A view that aggregates data from Silver for analysis.
 
 Clone this repository:
 
-git clone https://github.com/yourusername/Library-Management-System.git
-
+git clone https://github.com/AdityaK1197/Library-Management-System.git
 
 Open SQL Server Management Studio (SSMS) and connect to your database.
 
