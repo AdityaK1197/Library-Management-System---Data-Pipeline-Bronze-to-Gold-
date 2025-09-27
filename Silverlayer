@@ -1,0 +1,166 @@
+USE library_management_system;
+GO
+
+-- Silver Layer Data Load Procedure
+CREATE OR ALTER PROC silver_loaddata AS
+BEGIN
+
+    -- Loading Books Data
+    IF OBJECT_ID('silver.books', 'U') IS NOT NULL
+        DROP TABLE silver.books;
+
+    CREATE TABLE silver.books
+    (
+        isbn CHAR(17) PRIMARY KEY,
+        book_title NVARCHAR(500),
+        category VARCHAR(50),
+        rental_price FLOAT(50),  -- Correct data type for price (FLOAT)
+        status VARCHAR(50),
+        author NVARCHAR(50),
+        publisher NVARCHAR(50)
+    );
+
+    -- Deleting specific record from bronze.books before inserting in silver
+    DELETE FROM bronze.books
+    WHERE isbn = '978-0-393-91257-8';
+
+    -- Transformation: Inserting data from bronze to silver with cleaning/transformation
+    INSERT INTO silver.books
+    SELECT 
+        isbn,
+        book_title,
+        category,
+        CAST(rental_price AS float) AS 'rental_price',  -- Transformation: Casting rental_price from string to float
+        status,
+        author,
+        REPLACE(publisher, '"', '') AS publisher  -- Transformation: Removing quotes from publisher
+    FROM bronze.books;
+
+    -- Manually adding a new row (This is an example of direct insertion)
+    INSERT INTO silver.books
+    VALUES
+    ('978-0-393-91257-8', 'Guns Germs and Steel: The Fates of Human Societies', 'History', 7.00, 'yes', 'Jared Diamond', 'W. W. Norton & Company');
+
+    -- Loading Branch Data
+    IF OBJECT_ID('silver.branch', 'U') IS NOT NULL
+        DROP TABLE silver.branch;
+
+    CREATE TABLE silver.branch
+    (
+        branch_id CHAR(4) PRIMARY KEY,
+        manager_id NVARCHAR(50),
+        branch_address NVARCHAR(50),
+        contact_no CHAR(12)
+    );
+
+    -- Inserting data from bronze.branch to silver.branch (No transformation)
+    INSERT INTO silver.branch
+    SELECT * FROM bronze.branch;
+
+    -- Loading Employees Data
+    IF OBJECT_ID('silver.employees', 'U') IS NOT NULL
+        DROP TABLE silver.employees;
+
+    CREATE TABLE silver.employees
+    (
+        emp_id CHAR(4) PRIMARY KEY,
+        emp_name NVARCHAR(50),
+        position NVARCHAR(50),
+        salary INT,  -- Salary field now INT after conversion
+        branch_id CHAR(4),
+        FOREIGN KEY (branch_id) REFERENCES silver.branch(branch_id)  -- Foreign Key relationship to silver.branch
+    );
+
+    -- Transformation: Cleaning employee data (removing quotes) and converting salary to INT
+    INSERT INTO silver.employees
+    SELECT
+        REPLACE(emp_id, '"', '') AS emp_id,  -- Removing quotes from emp_id
+        REPLACE(emp_name, '"', '') AS emp_name,  -- Removing quotes from emp_name
+        REPLACE(position, '"', '') AS position,  -- Removing quotes from position
+        CAST(ROUND(REPLACE(salary, '"', ''), 0) AS INT) AS salary,  -- Cleaning salary and converting to INT
+        REPLACE(branch_id, '"', '') AS branch_id  -- Removing quotes from branch_id
+    FROM bronze.employees;
+
+    -- Loading Members Data
+    IF OBJECT_ID('silver.members', 'U') IS NOT NULL
+        DROP TABLE silver.members;
+
+    CREATE TABLE silver.members
+    (
+        member_id CHAR(4) PRIMARY KEY,
+        member_name NVARCHAR(50),
+        member_address NVARCHAR(50),
+        reg_date DATE  -- Reg date is now in DATE format
+    );
+
+    -- Transformation: Cleaning quotes, trimming spaces, and converting reg_date to DATE
+    INSERT INTO silver.members
+    SELECT 
+        REPLACE(member_id, '"', '') AS 'member_id',  -- Removing quotes from member_id
+        REPLACE(member_name, '"', '') AS 'member_name',  -- Removing quotes from member_name
+        TRIM(REPLACE(member_address, '"', '')) AS 'member_address',  -- Removing quotes and trimming spaces from member_address
+        CAST(REPLACE(reg_date, '"', '') AS DATE) AS 'reg_date'  -- Converting reg_date from string to DATE format
+    FROM bronze.members;
+
+    -- Loading Issued Status Data
+    IF OBJECT_ID('silver.issued_status', 'U') IS NOT NULL
+        DROP TABLE silver.issued_status;
+
+    CREATE TABLE silver.issued_status
+    (
+        issued_id CHAR(5) PRIMARY KEY,
+        issued_member_id CHAR(4),
+        issued_book_name NVARCHAR(500),
+        issued_date DATE,  -- Date format for issued_date
+        issued_book_isbn CHAR(17),
+        issued_emp_id CHAR(4),
+        FOREIGN KEY (issued_book_isbn) REFERENCES silver.books(isbn),  -- Foreign Key to books table
+        FOREIGN KEY (issued_emp_id) REFERENCES silver.employees(emp_id),  -- Foreign Key to employees table
+        FOREIGN KEY(issued_member_id) REFERENCES silver.members(member_id)  -- Foreign Key to members table
+    );
+
+    -- Deleting specific record from bronze.issued_status before inserting into silver
+    DELETE FROM bronze.issued_status
+    WHERE issued_id = '"IS116"';
+
+    -- Transformation: Cleaning quotes and converting issued_date to DATE
+    INSERT INTO silver.issued_status
+    SELECT 
+        REPLACE(issued_id, '"', '') AS 'issued_id',  -- Removing quotes from issued_id
+        REPLACE(issued_member_id, '"', '') AS 'issued_member_id',  -- Removing quotes from issued_member_id
+        REPLACE(issued_book_name, '"', '') AS 'issued_book_name',  -- Removing quotes from issued_book_name
+        CAST(REPLACE(issued_date, '"', '') AS DATE) AS 'issued_date',  -- Converting issued_date to DATE format
+        REPLACE(issued_book_isbn, '"', '') AS 'issued_book_isbn',  -- Removing quotes from issued_book_isbn
+        REPLACE(issued_emp_id, '"', '') AS 'issued_emp_id'  -- Removing quotes from issued_emp_id
+    FROM bronze.issued_status;
+
+    -- Manually adding a new record to issued_status
+    INSERT INTO silver.issued_status
+    VALUES
+    ('IS116', 'C110', 'Guns, Germs, and Steel: The Fates of Human Societies', '2024-03-20', '978-0-393-91257-8', 'E107');
+
+    -- Loading Return Status Data
+    IF OBJECT_ID('silver.return_status', 'U') IS NOT NULL
+        DROP TABLE silver.return_status;
+
+    CREATE TABLE silver.return_status
+    (
+        return_id CHAR(5) PRIMARY KEY,
+        issued_id CHAR(5),
+        return_book_name NVARCHAR(500),
+        return_date DATE,  -- Return date is now a DATE type
+        return_book_isbn CHAR(17),
+        FOREIGN KEY (issued_id) REFERENCES silver.issued_status(issued_id)  -- Foreign Key to issued_status table
+    );
+
+    -- Transformation: Removing quotes and converting return_date to DATE
+    INSERT INTO silver.return_status
+    SELECT 
+        REPLACE(return_id, '"', '') AS 'return_id',  -- Removing quotes from return_id
+        REPLACE(issued_id, '"', '') AS 'issued_id',  -- Removing quotes from issued_id
+        REPLACE(return_book_name, '"', '') AS 'return_book_name',  -- Removing quotes from return_book_name
+        CAST(REPLACE(return_date, '"', '') AS DATE) AS 'return_date',  -- Converting return_date to DATE format
+        REPLACE(return_book_isbn, '"', '') AS 'return_book_isbn'  -- Removing quotes from return_book_isbn
+    FROM bronze.return_status;
+
+END;
