@@ -1,0 +1,69 @@
+# Naming Conventions
+
+This project follows a set of consistent naming conventions to ensure readability, maintainability, and clarity of the database structure and SQL scripts.
+
+# 1. Tables
+
+Schema Prefix: Each table is prefixed by its layer (bronze, silver, gold) to indicate its stage in the ETL pipeline.
+
+Bronze Layer: Stores raw data.
+
+Example: bronze.books, bronze.employees
+
+Silver Layer: Stores cleaned and transformed data.
+
+Example: silver.books, silver.issued_status
+
+Gold Layer: Stores aggregated, business-ready data.
+
+Example: gold.dim_masterdata
+
+Descriptive Names: Tables are named based on their content. For example:
+
+books for book-related data.
+
+issued_status for tracking the issued book details.
+
+members for member details.
+
+# 2. Columns
+
+Lowercase with Underscores: Column names use lowercase letters with underscores to separate words, following common naming conventions.
+
+Example: book_title, member_id, issued_date.
+
+Consistent Naming for Identifiers: Foreign key columns are named consistently across tables, usually with the suffix _id.
+
+Example: branch_id (for foreign key referencing branch table), emp_id (for foreign key referencing employees table).
+
+Date Fields: Date-related columns follow a consistent naming convention to ensure clarity and prevent ambiguity.
+
+Example: issued_date, return_date, reg_date.
+
+# 3. Procedures
+
+Prefix with Action: Stored procedure names start with the action they perform (e.g., load, clean, transform, etc.).
+
+Example: bronze_loaddata, silver_loaddata.
+
+Consistency Across Layers: Procedures for each layer follow the same naming pattern, with a prefix indicating the layer:
+
+Bronze: Data loading procedures like bronze_loaddata.
+
+Silver: Data transformation procedures like silver_loaddata.
+
+# 4. Views
+
+Descriptive Names: Views are named based on the purpose they serve.
+
+Example: gold.dim_masterdata (dimension table for master data in the Gold layer).
+
+# 5. SQL Scripts
+
+Layer-based Naming: SQL scripts are named based on their respective layer and function.
+
+Example: bronze_layer.sql, silver_layer.sql, gold_layer.sql.
+
+# 6. Constants and Magic Values
+
+No Hardcoding: Avoid hardcoding values like ISBN or specific dates in procedures and views. Instead, use variables or parameters to handle these values dynamically.
