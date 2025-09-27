@@ -1,0 +1,124 @@
+
+--USE master
+
+--CREATE DATABASE library_management_system
+
+--USE library_management_system
+--GO
+--CREATE SCHEMA bronze
+--Go
+--CREATE SCHEMA silver
+--GO
+--CREATE SCHEMA gold
+
+USE library_management_system;
+GO
+
+-- Bronze Layer Data Load Procedure
+CREATE OR ALTER PROC bronze_loaddata AS
+BEGIN
+
+    -- Loading Books Data
+    IF OBJECT_ID('bronze.books', 'U') IS NOT NULL
+        DROP TABLE bronze.books;
+
+    CREATE TABLE bronze.books
+    (
+        isbn NVARCHAR(50) PRIMARY KEY,
+        book_title NVARCHAR(500),
+        category NVARCHAR(50),
+        rental_price NVARCHAR(50),
+        status NVARCHAR(50),
+        author NVARCHAR(50),
+        publisher NVARCHAR(50)
+    );
+
+    BULK INSERT bronze.books
+    FROM 'path\SQL Projects\Library Management System\books.csv'
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+
+    -- Loading Branch Data
+    IF OBJECT_ID('bronze.branch', 'U') IS NOT NULL
+        DROP TABLE bronze.branch;
+
+    CREATE TABLE bronze.branch
+    (
+        branch_id NVARCHAR(50) PRIMARY KEY,
+        manager_id NVARCHAR(50),
+        branch_address NVARCHAR(50),
+        contact_no NVARCHAR(50)
+    );
+
+    BULK INSERT bronze.branch
+    FROM 'path\SQL Projects\Library Management System\branch.csv'
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+
+    -- Loading Employees Data
+    IF OBJECT_ID('bronze.employees', 'U') IS NOT NULL
+        DROP TABLE bronze.employees;
+
+    CREATE TABLE bronze.employees
+    (
+        emp_id NVARCHAR(50) PRIMARY KEY,
+        emp_name NVARCHAR(50),
+        position NVARCHAR(50),
+        salary NVARCHAR(50),
+        branch_id NVARCHAR(50)
+    );
+
+    BULK INSERT bronze.employees
+    FROM 'path\SQL Projects\Library Management System\employees.csv'
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK, CODEPAGE = '0XX0a');
+
+    -- Loading Issued Status Data
+    IF OBJECT_ID('bronze.issued_status', 'U') IS NOT NULL
+        DROP TABLE bronze.issued_status;
+
+    CREATE TABLE bronze.issued_status
+    (
+        issued_id NVARCHAR(50) PRIMARY KEY,
+        issued_member_id NVARCHAR(50),
+        issued_book_name NVARCHAR(500),
+        issued_date NVARCHAR(50),
+        issued_book_isbn NVARCHAR(50),
+        issued_emp_id NVARCHAR(50)
+    );
+
+    BULK INSERT bronze.issued_status
+    FROM 'path\SQL Projects\Library Management System\issued_status.csv'
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+
+    -- Loading Members Data
+    IF OBJECT_ID('bronze.members', 'U') IS NOT NULL
+        DROP TABLE bronze.members;
+
+    CREATE TABLE bronze.members
+    (
+        member_id NVARCHAR(50) PRIMARY KEY,
+        member_name NVARCHAR(50),
+        member_address NVARCHAR(50),
+        reg_date NVARCHAR(50)
+    );
+
+    BULK INSERT bronze.members
+    FROM 'path\SQL Projects\Library Management System\members.csv'
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+
+    -- Loading Return Status Data
+    IF OBJECT_ID('bronze.return_status', 'U') IS NOT NULL
+        DROP TABLE bronze.return_status;
+
+    CREATE TABLE bronze.return_status
+    (
+        return_id NVARCHAR(50) PRIMARY KEY,
+        issued_id NVARCHAR(50),
+        return_book_name NVARCHAR(50),
+        return_date NVARCHAR(50),
+        return_book_isbn NVARCHAR(50)
+    );
+
+    BULK INSERT bronze.return_status
+    FROM 'path\SQL Projects\Library Management System\return_status.csv'
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK, CODEPAGE = '0XX0a');
+
+END;
