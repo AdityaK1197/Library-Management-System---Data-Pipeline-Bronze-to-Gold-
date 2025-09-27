@@ -1,0 +1,33 @@
+CREATE VIEW gold.dim_masterdata AS
+
+SELECT 
+    a.isbn,
+    a.book_title,
+    a.category,
+    a.rental_price,
+    a.status,
+    a.author,
+    a.publisher,
+    b.issued_id,
+    c.return_id,
+    b.issued_member_id,
+    d.member_name,
+    b.issued_book_name,
+    b.issued_date,
+    c.return_date,
+    b.issued_emp_id,
+    e.emp_name,
+    f.branch_id,
+    f.manager_id,
+    f.branch_address,
+    f.contact_no
+FROM silver.books a
+JOIN silver.issued_status b ON a.isbn = b.issued_book_isbn
+LEFT JOIN silver.return_status c ON c.issued_id = b.issued_id
+LEFT JOIN silver.members d ON d.member_id = b.issued_member_id
+LEFT JOIN silver.employees e ON b.issued_emp_id = e.emp_id
+LEFT JOIN silver.branch f ON f.branch_id = e.branch_id;
+
+
+
+
