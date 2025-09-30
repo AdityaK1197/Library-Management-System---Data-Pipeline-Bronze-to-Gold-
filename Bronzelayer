@@ -35,7 +35,7 @@ BEGIN
 
     BULK INSERT bronze.books
     FROM 'path\SQL Projects\Library Management System\books.csv'
-    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '0X0a', CODEPAGE = '65001', TABLOCK);
 
     -- Loading Branch Data
     IF OBJECT_ID('bronze.branch', 'U') IS NOT NULL
@@ -51,7 +51,7 @@ BEGIN
 
     BULK INSERT bronze.branch
     FROM 'path\SQL Projects\Library Management System\branch.csv'
-    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '0X0a', CODEPAGE = '65001', TABLOCK);
 
     -- Loading Employees Data
     IF OBJECT_ID('bronze.employees', 'U') IS NOT NULL
@@ -68,7 +68,7 @@ BEGIN
 
     BULK INSERT bronze.employees
     FROM 'path\SQL Projects\Library Management System\employees.csv'
-    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK, CODEPAGE = '0XX0a');
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '0X0a', CODEPAGE = '65001', TABLOCK);
 
     -- Loading Issued Status Data
     IF OBJECT_ID('bronze.issued_status', 'U') IS NOT NULL
@@ -86,7 +86,7 @@ BEGIN
 
     BULK INSERT bronze.issued_status
     FROM 'path\SQL Projects\Library Management System\issued_status.csv'
-    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',',ROWTERMINATOR = '0X0a', CODEPAGE = '65001', TABLOCK);
 
     -- Loading Members Data
     IF OBJECT_ID('bronze.members', 'U') IS NOT NULL
@@ -102,7 +102,7 @@ BEGIN
 
     BULK INSERT bronze.members
     FROM 'path\SQL Projects\Library Management System\members.csv'
-    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', CODEPAGE = '0XX0a', TABLOCK);
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '0X0a', CODEPAGE = '65001', TABLOCK);
 
     -- Loading Return Status Data
     IF OBJECT_ID('bronze.return_status', 'U') IS NOT NULL
@@ -119,6 +119,7 @@ BEGIN
 
     BULK INSERT bronze.return_status
     FROM 'path\SQL Projects\Library Management System\return_status.csv'
-    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', TABLOCK, CODEPAGE = '0XX0a');
+    WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '0X0a', CODEPAGE = '65001', TABLOCK);
 
 END;
+
